@@ -17,7 +17,6 @@ static PyMethodDef module_methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
-/* This is the function that is called on import. */
 PyMODINIT_FUNC init_convolution(void)
 {
     /* Initialize the module with a docstring. */
@@ -29,7 +28,6 @@ PyMODINIT_FUNC init_convolution(void)
     import_array();
 }
 
-/* Do the heavy lifting here */
 static PyObject *convolution_convolve1d_boundary_wrap(PyObject *self, PyObject *args)
 {
     PyObject *f_obj, *g_obj;
@@ -65,7 +63,8 @@ static PyObject *convolution_convolve1d_boundary_wrap(PyObject *self, PyObject *
     int nkx = (int)PyArray_DIM(g_array, 0);
 
     if (nkx % 2 != 1) {
-        PyErr_SetString(PyExc_TypeError, "Convolution kernel must have odd dimensions.");
+        PyErr_SetString(PyExc_TypeError,
+                "Convolution kernel must have odd dimensions.");
         Py_DECREF(f_array);
         Py_DECREF(g_array);
         return NULL;
@@ -91,7 +90,12 @@ static PyObject *convolution_convolve1d_boundary_wrap(PyObject *self, PyObject *
     double *f = (double*)PyArray_DATA(f_array);
     double *g = (double*)PyArray_DATA(g_array);
 
-    /* Define some variables. */
+    /*
+     *
+     * This is where the port of code from the Cython module starts.
+     *
+     */
+
     int i, ii, iii, iimin, iimax;
     double top, bot, val, ker;
     int wkx = nkx / 2;
@@ -107,8 +111,11 @@ static PyObject *convolution_convolve1d_boundary_wrap(PyObject *self, PyObject *
             iimin = i - wkx;
             iimax = i + wkx + 1;
             for (ii = iimin; ii < iimax; ii++) {
+
+                /* Deal with wrapping properly */
                 if (ii < 0) iii = (nx + ii) % nx;
                 else iii = ii % nx;
+
                 val = f[iii];
                 if (npy_isnan(val) == 0) {
                     ker = g[wkx + ii - i];
@@ -154,6 +161,12 @@ static PyObject *convolution_convolve1d_boundary_wrap(PyObject *self, PyObject *
             out[i] = fixed[i];
         }
     }
+
+    /*
+     *
+     * That's the end of the port... just a little bit of book keeping left.
+     *
+     */
 
     /* Clean up. */
     free(fixed);
