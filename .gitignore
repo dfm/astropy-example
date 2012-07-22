@@ -1,6 +1,6 @@
 build
 .DS_Store
-example.c
+_cython.c
 *.pyc
 *.png
 *.so

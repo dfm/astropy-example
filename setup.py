@@ -5,8 +5,8 @@ from Cython.Distutils import build_ext
 import numpy.distutils.misc_util
 
 
-c_ext = [Extension("_cython_demo", ["example.pyx"]),
-         Extension("_convolution", ["c/wrapper.c"])]
+c_ext = [Extension("_cython", ["_cython.pyx"]),
+         Extension("_convolution", ["_convolution.c"])]
 
 
 setup(
