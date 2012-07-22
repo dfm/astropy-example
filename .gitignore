@@ -3,3 +3,4 @@ build
 example.c
 *.pyc
 *.png
+*.so
